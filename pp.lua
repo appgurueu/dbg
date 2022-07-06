@@ -147,7 +147,7 @@ local pp = function(params, ...)
 				write" "; write("end", "function")
 				if write_upvals then
 					indent = indent - 1; newline()
-					write("end", "function"); write")"
+					write("end", "function"); write")()"
 				end
 			elseif typ == "table" then
 				write"{"
