@@ -164,7 +164,7 @@ local error = error -- localize error to allow overriding _G.error = dbg.error
 
 function dbg.error(msg, level)
 	print("caught error: "); dbg.pp(msg)
-	if dd(level, true) then
+	if dd((level or 1) + 1, true) then
 		return error(msg, level)
 	end
 end
