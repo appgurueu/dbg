@@ -33,8 +33,7 @@ local function vars(where, getvar, setvar)
 end
 
 function dbg.locals(level)
-	level = level or 1
-	return vars(level + 1, debug.getlocal, debug.setlocal)
+	return vars((level or 1) + 1, debug.getlocal, debug.setlocal)
 end
 
 function dbg.upvals(func)
