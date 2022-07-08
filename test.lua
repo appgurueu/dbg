@@ -14,12 +14,12 @@ local function assert_vars(vartype, expected)
 	end
 	assert(i == #expected)
 end
-local f = function(c, e) -- luacheck: ignore
+(function(c, e) -- luacheck: ignore
 	assert(a == nil)
 	assert(b == "b")
 	assert_vars("upvals", {
-		"a", nil;
-		"b", "b";
+		"a", a;
+		"b", b;
 		"assert_vars", assert_vars;
 	})
 	do
@@ -49,5 +49,4 @@ local f = function(c, e) -- luacheck: ignore
 		"f", f;
 		"g", g;
 	})
-end
-f()
+end)()
