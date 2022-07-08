@@ -232,8 +232,8 @@ local function getargs(func)
 		local i = 1
 		while true do
 			local name = debug.getlocal(2, i)
-			if name == nil or name:match"^%(" then break end
-			table.insert(args, name)
+			if name == nil then break end
+			if not name:match"^%(" then table.insert(args, name) end
 			i = i + 1
 		end
 		error(args)
