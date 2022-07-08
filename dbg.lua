@@ -1,30 +1,33 @@
 local debug = ...
 
-local function vars(where, getvar, setvar)
+function dbg.locals(level)
+	level = (level or 1) + 1
+
 	local idx = {}
 	do
 		local i = 1
 		while true do
-			local name = getvar(where, i)
+			local name = debug.getlocal(level, i)
 			if name == nil then break end
 			idx[name] = i
 			i = i + 1
 		end
 	end
+
 	return setmetatable({}, {
 		__index = function(_, name)
-			local _, value = getvar(where, assert(idx[name], "no variable with given name"))
+			local _, value = debug.getlocal(level, assert(idx[name], "no variable with given name"))
 			return value
 		end,
 		__newindex = function(_, name, value)
-			setvar(where, assert(idx[name], "no variable with given name"), value)
+			debug.setlocal(level, assert(idx[name], "no variable with given name"), value)
 		end,
 		__call = function()
 			local i = 0
 			local function iterate()
 				i = i + 1
-				-- Making this a tail call requires changing `where`
-				local name, value = getvar(where, i)
+				-- Making this a tail call requires passing `level - 1`
+				local name, value = debug.getlocal(level, i)
 				return name, value
 			end
 			return iterate
@@ -32,20 +35,45 @@ local function vars(where, getvar, setvar)
 	})
 end
 
-function dbg.locals(level)
-	return vars((level or 1) + 1, debug.getlocal, debug.setlocal)
-end
-
 function dbg.upvals(func)
 	if type(func) ~= "function" then
 		func = debug.getinfo((func or 1) + 1, "f").func
 	end
-	return vars(func, debug.getupvalue, debug.setupvalue)
+
+	local idx = {}
+	do
+		local i = 1
+		while true do
+			local name = debug.getupvalue(func, i)
+			if name == nil then break end
+			idx[name] = i
+			i = i + 1
+		end
+	end
+
+	return setmetatable({}, {
+		__index = function(_, name)
+			local _, value = debug.getupvalue(func, assert(idx[name], "no upval with given name"))
+			return value
+		end,
+		__newindex = function(_, name, value)
+			debug.setupvalue(func, assert(idx[name], "no upval with given name"), value)
+		end,
+		__call = function()
+			local i = 0
+			local function iterate()
+				i = i + 1
+				return debug.getupvalue(func, i)
+			end
+			return iterate
+		end
+	})
 end
 
 function dbg.vars(level)
 	level = (level or 1) + 1
 	local func = debug.getinfo(level, "f").func
+
 	local idx, is_local = {}, {}
 	-- Upvals
 	do
@@ -68,6 +96,7 @@ function dbg.vars(level)
 			i = i + 1
 		end
 	end
+
 	return setmetatable({}, {
 		__index = function(_, name)
 			local var_idx = assert(idx[name], "no variable with given name")
@@ -98,9 +127,9 @@ function dbg.vars(level)
 					until not is_local[name]
 					if name == nil then
 						i, upvals = 1, false
-						return iterate()
 					end
-				else
+				end
+				if not upvals then
 					name, value = debug.getlocal(level, i)
 					i = i + 1
 				end
