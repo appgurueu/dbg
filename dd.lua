@@ -110,8 +110,11 @@ local function dd(level, caught_err)
 			chunk, err = loadbuf()
 			if #buf == 1 and not chunk and not line:match"^return " then
 				-- Try implicit return
-				buf = {"return " .. line}
-				chunk, err = loadbuf()
+				buf[1] = "return " .. line
+				chunk = loadbuf()
+				if not chunk then
+					buf[1] = line
+				end
 			end
 			continuation = err and err:find"<eof>" -- same hack as used in the Lua REPL
 		end
