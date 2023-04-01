@@ -3,7 +3,7 @@ dbg = {}
 local debug = assert(minetest.request_insecure_environment(), "add dbg to secure.trusted_mods").debug
 
 local function load(filename)
-	return assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. ("/%s.lua"):format(filename)))(debug)
+	return assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. ("/src/%s.lua"):format(filename)))(debug)
 end
 
 load"shorten_path"
